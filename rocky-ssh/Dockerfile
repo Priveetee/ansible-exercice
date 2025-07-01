@@ -1,39 +1,21 @@
-# Image de base Rocky Linux 9
+# Contenu final et correct pour rocky-ssh/Dockerfile
 FROM rockylinux:9
 
-# Installation des paquets nécessaires
-RUN dnf update -y && dnf install -y \
-    openssh-server \
-    sudo \
-    iproute \
-    iputils \
-    net-tools \
-    wget \
-    traceroute \
-    telnet \
-    lsof \
-    vim \
-    nano \
-    gnupg2 \
-    && dnf clean all && \
-    rm -rf /var/cache/dnf
+# Installer le serveur SSH et générer les clés d'hôte du serveur
+RUN dnf update -y && dnf install -y openssh-server sudo && \
+    ssh-keygen -A
 
-# Préparer le répertoire nécessaire à sshd
-RUN mkdir /var/run/sshd
+# Créer le répertoire .ssh et y copier la clé publique
+RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh
+COPY rocky-ssh/id_rsa.pub /root/.ssh/authorized_keys
+RUN chmod 600 /root/.ssh/authorized_keys && chown root:root /root/.ssh/authorized_keys
 
-# Définir un mot de passe pour root (à ne jamais faire en production)
-RUN echo "root:P@ssw0rd" | chpasswd
+# Autoriser la connexion root par SSH
+RUN sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+RUN sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
 
-# Autoriser la connexion root par mot de passe
-RUN sed -i 's/^#\?PermitRootLogin .*/PermitRootLogin yes/' /etc/ssh/sshd_config && \
-    sed -i 's/^#\?PasswordAuthentication .*/PasswordAuthentication yes/' /etc/ssh/sshd_config
-
-# Fix PAM (évite que SSH déconnecte l'utilisateur immédiatement)
+# Correction pour les conteneurs systemd
 RUN sed -i 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' /etc/pam.d/sshd
 
-# Exposer le port SSH
 EXPOSE 22
-
-# Lancer SSH en avant-plan pour maintenir le conteneur actif
-#CMD ["/usr/sbin/sshd", "-D"]
-CMD ["/bin/bash", "-c", "ssh-keygen -A && /usr/sbin/sshd -D"]
+CMD ["/usr/sbin/sshd", "-D", "-e"]

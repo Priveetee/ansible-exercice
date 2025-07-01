@@ -1,0 +1,26 @@
+---
+- name: Planifier une tache avec cron
+  hosts: client1
+  gather_facts: true # <-- CHANGEMENT ICI
+  become: true
+
+  tasks:
+    - name: Mettre a jour le cache des paquets (Debian/Ubuntu)
+      ansible.builtin.apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Installer le paquet cron
+      ansible.builtin.package:
+        name: cron
+        state: present
+
+    - name: Planifier l'execution du script
+      ansible.builtin.cron:
+        name: "creation de test1"
+        minute: "10"
+        hour: "15"
+        weekday: "1"
+        job: "/root/script1.sh"
+        user: root
+        state: present

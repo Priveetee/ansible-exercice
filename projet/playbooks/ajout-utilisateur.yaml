@@ -1,0 +1,15 @@
+---
+- name: Creer un utilisateur
+  hosts: all
+  gather_facts: false
+  become: true
+
+  tasks:
+    - name: Creer l'utilisateur pierre
+      ansible.builtin.user:
+        name: pierre
+        comment: "Utilisateur Pierre"
+        shell: /bin/bash
+        home: /home/pierre
+        state: present
+        create_home: yes # Important pour créer le dossier /home/pierre

@@ -1,0 +1,10 @@
+---
+- name: Modifier les permissions d'un fichier distant
+  hosts: ubuntu
+  gather_facts: false
+
+  tasks:
+    - name: Ajouter la permission d'ecriture pour tous
+      ansible.builtin.file:
+        path: /root/vinci
+        mode: "a+w"

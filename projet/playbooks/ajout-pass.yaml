@@ -1,0 +1,13 @@
+---
+- name: Definir le mot de passe pour pierre
+  hosts: all
+  gather_facts: false
+  become: true
+
+  tasks:
+    - name: Mettre a jour le mot de passe de l'utilisateur pierre
+      ansible.builtin.user:
+        name: pierre
+        password: "{{ newpass | password_hash('sha512') }}"
+        state: present
+        update_password: always # <-- CHANGEMENT ICI

@@ -1,0 +1,8 @@
+---
+- name: Tester la connexion aux clients distants
+  hosts: all
+  gather_facts: false
+
+  tasks:
+    - name: Utiliser le module ping pour verifier la connexion
+      ansible.builtin.ping:

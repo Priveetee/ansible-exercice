@@ -1,0 +1,9 @@
+---
+- name: Transferer et executer un script
+  hosts: all
+  gather_facts: false
+
+  tasks:
+    - name: Executer le script local sur les machines distantes
+      ansible.builtin.script:
+        cmd: "{{ playbook_dir }}/script2.sh"
